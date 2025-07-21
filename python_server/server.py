@@ -19,9 +19,10 @@ async def handler(websocket, path):
             await client.send(message)
 
 async def main():
+    loop = asyncio.get_running_loop()
     # Start the web server in a separate thread
     httpd = TCPServer(("", PORT), WebServer)
-    httpd_thread = asyncio.to_thread(httpd.serve_forever)
+    httpd_thread = loop.run_in_executor(None, httpd.serve_forever)
     print(f"Web server serving at port {PORT}")
 
     # Start the WebSocket server

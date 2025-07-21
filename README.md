@@ -13,7 +13,7 @@ This project allows you to stream gyroscope sensor data from your mobile device 
 
 ### Prerequisites
 
--   Python 3.x ([Download](https://www.python.org/downloads/))
+-   Python 3.8 or higher ([Download](https://www.python.org/downloads/))
 -   A mobile device with a gyroscope sensor and a modern web browser that supports the Generic Sensor API.
 
 ### Installation & Usage
