@@ -57,29 +57,21 @@ function runDiagnostics() {
     }
 }
 
-function startMotionEvents() {
-    try {
-        if (window.DeviceMotionEvent) {
-            window.addEventListener('devicemotion', (event) => {
-                const { rotationRate } = event;
-                if (rotationRate) {
-                    const data = {
-                        x: rotationRate.alpha,
-                        y: rotationRate.beta,
-                        z: rotationRate.gamma
-                    };
-                    socket.send(JSON.stringify(data));
-                }
-            });
-        } else {
-            alert('Device Motion API not supported on this device.');
-        }
-    } catch (e) {
-        errorStatus.textContent = e.message;
+function startAccelerometer() {
+    if ('Accelerometer' in window) {
+        const accelerometer = new Accelerometer({ frequency: 60 });
+        accelerometer.addEventListener('reading', () => {
+            const { x, y, z } = accelerometer;
+            const data = { x, y, z };
+            socket.send(JSON.stringify(data));
+        });
+        accelerometer.start();
+    } else {
+        alert('Accelerometer API not supported on this device.');
     }
 }
 
 window.addEventListener('load', () => {
     runDiagnostics();
-    startMotionEvents();
+    startAccelerometer();
 });
