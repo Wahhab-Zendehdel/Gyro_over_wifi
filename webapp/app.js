@@ -37,4 +37,49 @@ function startMotionEvents() {
     }
 }
 
-window.addEventListener('load', startMotionEvents);
+const genericSensorApiStatus = document.getElementById('generic-sensor-api');
+const deviceMotionApiStatus = document.getElementById('device-motion-api');
+const errorStatus = document.getElementById('error');
+
+function runDiagnostics() {
+    // Check for Generic Sensor API
+    if ('Gyroscope' in window) {
+        genericSensorApiStatus.textContent = 'Supported';
+    } else {
+        genericSensorApiStatus.textContent = 'Not supported';
+    }
+
+    // Check for Device Motion API
+    if (window.DeviceMotionEvent) {
+        deviceMotionApiStatus.textContent = 'Supported';
+    } else {
+        deviceMotionApiStatus.textContent = 'Not supported';
+    }
+}
+
+function startMotionEvents() {
+    try {
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', (event) => {
+                const { rotationRate } = event;
+                if (rotationRate) {
+                    const data = {
+                        x: rotationRate.alpha,
+                        y: rotationRate.beta,
+                        z: rotationRate.gamma
+                    };
+                    socket.send(JSON.stringify(data));
+                }
+            });
+        } else {
+            alert('Device Motion API not supported on this device.');
+        }
+    } catch (e) {
+        errorStatus.textContent = e.message;
+    }
+}
+
+window.addEventListener('load', () => {
+    runDiagnostics();
+    startMotionEvents();
+});
