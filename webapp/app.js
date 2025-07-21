@@ -57,21 +57,19 @@ function runDiagnostics() {
     }
 }
 
-function startAccelerometer() {
-    if ('Accelerometer' in window) {
-        const accelerometer = new Accelerometer({ frequency: 60 });
-        accelerometer.addEventListener('reading', () => {
-            const { x, y, z } = accelerometer;
-            const data = { x, y, z };
-            socket.send(JSON.stringify(data));
-        });
-        accelerometer.start();
-    } else {
-        alert('Accelerometer API not supported on this device.');
-    }
+function startMotionJs() {
+    Motion.on('motion', (data) => {
+        if (data.acceleration) {
+            const { x, y, z } = data.acceleration;
+            const motionData = { x, y, z };
+            socket.send(JSON.stringify(motionData));
+        }
+    });
+
+    Motion.start();
 }
 
 window.addEventListener('load', () => {
     runDiagnostics();
-    startAccelerometer();
+    startMotionJs();
 });
