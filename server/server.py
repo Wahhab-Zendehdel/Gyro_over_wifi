@@ -20,16 +20,22 @@ async def handler(websocket, path):
         for client in connected:
             await client.send(message)
 
+import ssl
+
 async def main():
+    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_context.load_cert_chain(certfile="cert.pem", keyfile="key.pem")
+
     loop = asyncio.get_running_loop()
     # Start the web server in a separate thread
     httpd = TCPServer(("", PORT), WebServer)
+    httpd.socket = ssl_context.wrap_socket(httpd.socket, server_side=True)
     httpd_thread = loop.run_in_executor(None, httpd.serve_forever)
-    print(f"Web server serving at port {PORT}")
+    print(f"Web server serving at https://localhost:{PORT}")
 
     # Start the WebSocket server
-    async with websockets.serve(register, "0.0.0.0", 8081):
-        print("WebSocket server started at port 8081")
+    async with websockets.serve(register, "0.0.0.0", 8081, ssl=ssl_context):
+        print("WebSocket server started at wss://localhost:8081")
         await httpd_thread
 
 connected = set()

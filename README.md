@@ -11,13 +11,47 @@ This project allows you to view gyroscope and accelerometer data from your mobil
 
 ### Usage
 
-1.  **Deploy the web application:**
-    -   This project is designed to be deployed to GitHub Pages. Simply push the code to a GitHub repository and enable GitHub Pages in the repository settings.
-    -   Alternatively, you can run a simple web server in the root directory of the project (e.g., `python -m http.server`).
+This project can be used in two ways:
 
-2.  **View the sensor data:**
-    -   Open the web application in a browser on your mobile device.
-    -   You should see the sensor data being displayed on the web page.
+1.  **Deployed to a hosting service that supports HTTPS (e.g., GitHub Pages):**
+    -   This is the recommended approach.
+    -   Simply push the code to a GitHub repository and enable GitHub Pages in the repository settings.
+    -   The web application will be available at `https://<your-username>.github.io/<your-repo-name>/`.
+
+2.  **Run locally with a self-signed SSL certificate:**
+    -   This approach is useful for testing and development.
+    -   You will need to have OpenSSL installed on your computer.
+
+    **Instructions:**
+
+    1.  **Generate a self-signed SSL certificate:**
+        -   Navigate to the `server` directory:
+            ```bash
+            cd server
+            ```
+        -   Run the following command:
+            ```bash
+            openssl req -new -x509 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=CA/L=San Francisco/O=My Company/OU=My Department/CN=localhost"
+            ```
+
+    2.  **Run the Python server:**
+        -   Navigate to the `server` directory:
+            ```bash
+            cd server
+            ```
+        -   Run the server:
+            ```bash
+            python server.py
+            ```
+        -   The server will start an HTTPS server on port 8080 and a secure WebSocket server on port 8081.
+
+    3.  **Trust the self-signed certificate:**
+        -   Open your browser and navigate to `https://localhost:8080`.
+        -   You will see a warning message about the self-signed certificate.
+        -   You will need to accept the risk and proceed to the website. The exact steps for this will vary depending on your browser.
+
+    4.  **View the sensor data:**
+        -   Once you have trusted the certificate, you should be able to see the sensor data being displayed on the web page.
 
 ## (Optional) Receiving Data with Python
 
@@ -31,21 +65,13 @@ If you want to receive the sensor data on your computer, you can use the provide
 ### Usage
 
 1.  **Start the WebSocket server:**
-    -   Navigate to the `server` directory:
-        ```bash
-        cd server
-        ```
-    -   Run the server:
-        ```bash
-        python server.py
-        ```
-    -   The server will start a WebSocket server on port 8081.
+    -   Follow the instructions above to run the server with a self-signed SSL certificate.
 
 2.  **Modify the web application:**
     -   You will need to modify the `scripts/script.js` file to connect to the WebSocket server.
     -   Uncomment the following line:
         ```javascript
-        // var socket = new WebSocket('ws://<your-computer-ip>:8081');
+        // var socket = new WebSocket('wss://<your-computer-ip>:8081');
         ```
     -   Replace `<your-computer-ip>` with the IP address of the computer running the Python server.
     -   Uncomment the following lines:
