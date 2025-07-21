@@ -6,9 +6,11 @@ from socketserver import TCPServer
 
 PORT = 8080
 
+import os
+
 class WebServer(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory="webapp", **kwargs)
+        super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), '..', 'webapp'), **kwargs)
 
 async def handler(websocket, path):
     async for message in websocket:
