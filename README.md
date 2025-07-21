@@ -1,22 +1,20 @@
-# Gyroscope Streamer
+# Gyroscope Web Streamer
 
-[![Android CI](https://github.com/your-username/your-repo/actions/workflows/android.yml/badge.svg)](https://github.com/your-username/your-repo/actions/workflows/android.yml)
 [![Python Application](https://github.com/your-username/your-repo/actions/workflows/python-app.yml/badge.svg)](https://github.com/your-username/your-repo/actions/workflows/python-app.yml)
 
 ## :wave: Introduction
 
-This project allows you to stream gyroscope sensor data from your Android device to your computer in real-time. It consists of two main components:
+This project allows you to stream gyroscope sensor data from your mobile device to your computer in real-time using a web browser. It consists of two main components:
 
--   :iphone: **An Android application** that captures gyroscope data and sends it over Wi-Fi.
--   :computer: **A Python server** that receives and displays the data.
+-   :iphone: **A web application** that accesses the gyroscope sensor using the Generic Sensor API and sends the data over a WebSocket connection.
+-   :computer: **A Python server** that serves the web application and relays gyroscope data to all connected clients.
 
 ## :rocket: Getting Started
 
 ### Prerequisites
 
--   Android Studio ([Download](https://developer.android.com/studio))
 -   Python 3.x ([Download](https://www.python.org/downloads/))
--   An Android device with a gyroscope sensor
+-   A mobile device with a gyroscope sensor and a modern web browser that supports the Generic Sensor API.
 
 ### Installation & Usage
 
@@ -27,34 +25,30 @@ This project allows you to stream gyroscope sensor data from your Android device
     cd your-repo
     ```
 
-2.  **Run the Python server:**
+2.  **Install dependencies:**
+
+    ```bash
+    pip install websockets
+    ```
+
+3.  **Run the Python server:**
 
     ```bash
     cd python_server
     python server.py
     ```
 
-    The server will start listening on `0.0.0.0:8080`.
-
-3.  **Run the Android app:**
-    -   Open the `GyroscopeApp` directory in Android Studio.
-    -   Connect your Android device to your computer.
-    -   Build and run the app on your device.
+    The server will start a web server on port 8080 and a WebSocket server on port 8081.
 
 4.  **Connect and stream:**
-    -   Ensure your Android device and computer are on the same Wi-Fi network.
-    -   The app will display your device's IP address.
-    -   The app will automatically attempt to connect to the server. Once connected, it will start streaming gyroscope data.
+    -   Ensure your mobile device and computer are on the same Wi-Fi network.
+    -   Open a web browser on your mobile device and navigate to `http://<your-computer-ip>:8080`.
+    -   The web page will display the gyroscope data from your device.
+    -   Open the same address in a web browser on your computer to see the data mirrored in real-time.
 
 ## :gear: Configuration
 
--   **Port:** The default port is `8080`. You can change this in:
-    -   `GyroscopeApp/app/src/main/java/com/example/gyroscopeapp/MainActivity.java` (in the `SERVER_PORT` constant)
-    -   `python_server/server.py`
--   **Permissions:** The Android app requires the following permissions, which are already included in the `AndroidManifest.xml`:
-    -   `ACCESS_WIFI_STATE`
-    -   `INTERNET`
-    -   `ACCESS_NETWORK_STATE`
+-   **Ports:** The default ports are `8080` for the web server and `8081` for the WebSocket server. You can change these in `python_server/server.py`.
 
 ## :handshake: Contributing
 
