@@ -57,19 +57,21 @@ function runDiagnostics() {
     }
 }
 
-function startMotionJs() {
-    Motion.on('motion', (data) => {
-        if (data.acceleration) {
-            const { x, y, z } = data.acceleration;
-            const motionData = { x, y, z };
-            socket.send(JSON.stringify(motionData));
-        }
+function startGyro() {
+    gyro.startTracking((o) => {
+        const data = {
+            x: o.x,
+            y: o.y,
+            z: o.z,
+            alpha: o.alpha,
+            beta: o.beta,
+            gamma: o.gamma
+        };
+        socket.send(JSON.stringify(data));
     });
-
-    Motion.start();
 }
 
 window.addEventListener('load', () => {
     runDiagnostics();
-    startMotionJs();
+    startGyro();
 });
