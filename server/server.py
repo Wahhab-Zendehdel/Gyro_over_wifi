@@ -10,7 +10,7 @@ import os
 
 class WebServer(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), '..', 'webapp'), **kwargs)
+        super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), '..'), **kwargs)
 
 async def handler(websocket, path):
     async for message in websocket:
