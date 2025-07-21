@@ -19,18 +19,22 @@ socket.onclose = () => {
     console.log('WebSocket connection closed');
 };
 
-function startGyroscope() {
-    if ('Gyroscope' in window) {
-        const gyroscope = new Gyroscope({ frequency: 60 });
-        gyroscope.addEventListener('reading', () => {
-            const { x, y, z } = gyroscope;
-            const data = { x, y, z };
-            socket.send(JSON.stringify(data));
+function startMotionEvents() {
+    if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', (event) => {
+            const { rotationRate } = event;
+            if (rotationRate) {
+                const data = {
+                    x: rotationRate.alpha,
+                    y: rotationRate.beta,
+                    z: rotationRate.gamma
+                };
+                socket.send(JSON.stringify(data));
+            }
         });
-        gyroscope.start();
     } else {
-        alert('Gyroscope API not supported on this device.');
+        alert('Device Motion API not supported on this device.');
     }
 }
 
-window.addEventListener('load', startGyroscope);
+window.addEventListener('load', startMotionEvents);
