@@ -1,6 +1,6 @@
 # Browser Gyroscope Test
 
-This project allows you to stream gyroscope and accelerometer data from your mobile device to your computer in real-time.
+This project allows you to view gyroscope and accelerometer data from your mobile device in real-time.
 
 ## :rocket: Getting Started
 
@@ -8,8 +8,6 @@ This project allows you to stream gyroscope and accelerometer data from your mob
 
 -   A mobile device with motion sensors.
 -   A modern web browser on your mobile device.
--   Python 3.8 or higher on your computer.
--   `websockets` Python library (`pip install websockets`).
 
 ### Usage
 
@@ -17,7 +15,22 @@ This project allows you to stream gyroscope and accelerometer data from your mob
     -   This project is designed to be deployed to GitHub Pages. Simply push the code to a GitHub repository and enable GitHub Pages in the repository settings.
     -   Alternatively, you can run a simple web server in the root directory of the project (e.g., `python -m http.server`).
 
-2.  **Run the Python server:**
+2.  **View the sensor data:**
+    -   Open the web application in a browser on your mobile device.
+    -   You should see the sensor data being displayed on the web page.
+
+## (Optional) Receiving Data with Python
+
+If you want to receive the sensor data on your computer, you can use the provided Python client and server scripts.
+
+### Prerequisites
+
+-   Python 3.8 or higher on your computer.
+-   `websockets` Python library (`pip install websockets`).
+
+### Usage
+
+1.  **Start the WebSocket server:**
     -   Navigate to the `server` directory:
         ```bash
         cd server
@@ -28,15 +41,40 @@ This project allows you to stream gyroscope and accelerometer data from your mob
         ```
     -   The server will start a WebSocket server on port 8081.
 
-3.  **Connect and stream:**
-    -   Open the web application in a browser on your mobile device.
-    -   The application will automatically connect to the WebSocket server running on your computer.
-    -   You should see the sensor data being streamed to the server's console.
+2.  **Modify the web application:**
+    -   You will need to modify the `scripts/script.js` file to connect to the WebSocket server.
+    -   Uncomment the following line:
+        ```javascript
+        // var socket = new WebSocket('ws://<your-computer-ip>:8081');
+        ```
+    -   Replace `<your-computer-ip>` with the IP address of the computer running the Python server.
+    -   Uncomment the following lines:
+        ```javascript
+        // if (socket.readyState === WebSocket.OPEN) {
+        //     const data = {
+        //         absolute,
+        //         rot_x,
+        //         rot_y,
+        //         rot_z,
+        //         acc_x,
+        //         acc_y,
+        //         acc_z,
+        //         currentScreenOrientation
+        //     };
+        //     socket.send(JSON.stringify(data));
+        // }
+        ```
 
-## :gear: Configuration
-
--   **WebSocket Port:** The default WebSocket port is `8081`. You can change this in `server/server.py` and `scripts/script.js`.
--   **WebSocket Host:** The web application will try to connect to the WebSocket server on the same host as the web page. If you are running the server on a different machine, you will need to change the host in `scripts/script.js`.
+3.  **Run the Python client:**
+    -   Navigate to the `server` directory:
+        ```bash
+        cd server
+        ```
+    -   Run the client:
+        ```bash
+        python client.py
+        ```
+    -   The client will connect to the WebSocket server and print the received data.
 
 ## :handshake: Contributing
 

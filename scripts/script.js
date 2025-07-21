@@ -12,7 +12,6 @@ var move_y = 0;
 var looping = false;
 var gravity = false;
 var ball = null;
-var socket = new WebSocket('ws://' + window.location.hostname + ':8081');
 
 $(document).ready(function() {
 	ball = document.getElementById('ball');
@@ -85,20 +84,6 @@ $(document).ready(function() {
 			$("#data").text(`Phone and browser must support motion sensors and they must be allowed for this site.
 			 Hold the phone screen up and press Start. Rotate your phone to check sensor data.
 			 Visual representation uses x and y axis, rotation is clamped within 30 degrees.`);
-		}
-
-		if (socket.readyState === WebSocket.OPEN) {
-			const data = {
-				absolute,
-				rot_x,
-				rot_y,
-				rot_z,
-				acc_x,
-				acc_y,
-				acc_z,
-				currentScreenOrientation
-			};
-			socket.send(JSON.stringify(data));
 		}
 	}, 10);
 
