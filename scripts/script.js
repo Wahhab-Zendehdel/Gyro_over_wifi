@@ -12,24 +12,7 @@ var move_y = 0;
 var looping = false;
 var gravity = false;
 var ball = null;
-console.log("Initializing WebSocket...");
-var socket = new WebSocket('wss://' + window.location.hostname + ':8081');
-
-socket.onopen = function(event) {
-	console.log("WebSocket connection opened:", event);
-};
-
-socket.onmessage = function(event) {
-	console.log("WebSocket message received:", event);
-};
-
-socket.onerror = function(event) {
-	console.error("WebSocket error observed:", event);
-};
-
-socket.onclose = function(event) {
-	console.log("WebSocket connection closed:", event);
-};
+var socket = io();
 
 $(document).ready(function() {
 	ball = document.getElementById('ball');
@@ -104,20 +87,17 @@ $(document).ready(function() {
 			 Visual representation uses x and y axis, rotation is clamped within 30 degrees.`);
 		}
 
-		if (socket.readyState === WebSocket.OPEN) {
-			const data = {
-				absolute,
-				rot_x,
-				rot_y,
-				rot_z,
-				acc_x,
-				acc_y,
-				acc_z,
-				currentScreenOrientation
-			};
-			console.log("Sending data:", data);
-			socket.send(JSON.stringify(data));
-		}
+		const data = {
+			absolute,
+			rot_x,
+			rot_y,
+			rot_z,
+			acc_x,
+			acc_y,
+			acc_z,
+			currentScreenOrientation
+		};
+		socket.emit('sensor_data', data);
 	}, 10);
 
 	$('#loop').click(function() {
