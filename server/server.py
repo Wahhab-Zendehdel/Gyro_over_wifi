@@ -1,34 +1,51 @@
-import socketio
-import eventlet
-import eventlet.wsgi
+import asyncio
+import json
+import websockets
+from http.server import SimpleHTTPRequestHandler
+from socketserver import TCPServer
+
+PORT = 8080
+
+import os
+
+class WebServer(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), '..'), **kwargs)
+
+async def handler(websocket, path):
+    async for message in websocket:
+        data = json.loads(message)
+        print(f"Received: {data}")
+        # Broadcast the data to all connected clients
+        for client in connected:
+            await client.send(message)
+
 import ssl
 
-# Create a Socket.IO server
-sio = socketio.Server(cors_allowed_origins='*')
+async def main():
+    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_context.load_cert_chain(certfile="cert.pem", keyfile="key.pem")
 
-# Wrap the Socket.IO server with a WSGI application
-app = socketio.WSGIApp(sio, static_files={
-    '/': {'content_type': 'text/html', 'filename': 'index.html'},
-    '/scripts/script.js': {'content_type': 'application/javascript', 'filename': 'scripts/script.js'},
-    '/styles/style.css': {'content_type': 'text/css', 'filename': 'styles/style.css'},
-})
+    loop = asyncio.get_running_loop()
+    # Start the web server in a separate thread
+    httpd = TCPServer(("", PORT), WebServer)
+    httpd.socket = ssl_context.wrap_socket(httpd.socket, server_side=True)
+    httpd_thread = loop.run_in_executor(None, httpd.serve_forever)
+    print(f"Web server serving at https://localhost:{PORT}")
 
-@sio.event
-def connect(sid, environ):
-    print('connect ', sid)
+    # Start the WebSocket server
+    async with websockets.serve(register, "0.0.0.0", 8081, ssl=ssl_context):
+        print("WebSocket server started at wss://localhost:8081")
+        await httpd_thread
 
-@sio.event
-def disconnect(sid):
-    print('disconnect ', sid)
+connected = set()
 
-@sio.on('gyroData')
-def on_gyro_data(sid, data):
-    print('Received gyro data: ', data)
-    sio.emit('gyroData', data, broadcast=True, include_self=False)
+async def register(websocket):
+    connected.add(websocket)
+    try:
+        await handler(websocket, path=None)
+    finally:
+        connected.remove(websocket)
 
-if __name__ == '__main__':
-    # Use eventlet to run the server
-    eventlet.wsgi.server(eventlet.wrap_ssl(eventlet.listen(('0.0.0.0', 8080)),
-                                           certfile='server/cert.pem',
-                                           keyfile='server/key.pem',
-                                           server_side=True), app)
+if __name__ == "__main__":
+    asyncio.run(main())

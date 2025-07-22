@@ -1,18 +1,19 @@
-import socketio
+import asyncio
+import websockets
+import json
 
-sio = socketio.Client(ssl_verify=False)
+import ssl
 
-@sio.event
-def connect():
-    print('connection established')
+async def receive_data():
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
 
-@sio.event
-def disconnect():
-    print('disconnected from server')
+    uri = "wss://localhost:8081"
+    async with websockets.connect(uri, ssl=ssl_context) as websocket:
+        while True:
+            data = await websocket.recv()
+            print(json.loads(data))
 
-@sio.on('gyroData')
-def on_gyro_data(data):
-    print('I received a message!', data)
-
-sio.connect('https://localhost:8080', transports=['websocket'])
-sio.wait()
+if __name__ == "__main__":
+    asyncio.run(receive_data())
