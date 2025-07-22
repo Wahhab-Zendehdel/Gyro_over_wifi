@@ -12,24 +12,20 @@ var move_y = 0;
 var looping = false;
 var gravity = false;
 var ball = null;
-console.log("Initializing WebSocket...");
-var socket = new WebSocket('wss://' + window.location.hostname + ':8081');
+console.log("Initializing Socket.IO...");
+var socket = io({transports: ['websocket']});
 
-socket.onopen = function(event) {
-	console.log("WebSocket connection opened:", event);
-};
+socket.on('connect', function() {
+	console.log('Socket.IO connection opened');
+});
 
-socket.onmessage = function(event) {
-	console.log("WebSocket message received:", event);
-};
+socket.on('disconnect', function() {
+	console.log('Socket.IO connection closed');
+});
 
-socket.onerror = function(event) {
-	console.error("WebSocket error observed:", event);
-};
-
-socket.onclose = function(event) {
-	console.log("WebSocket connection closed:", event);
-};
+socket.on('gyroData', function(data) {
+	console.log('Received gyro data:', data);
+});
 
 $(document).ready(function() {
 	ball = document.getElementById('ball');
@@ -104,7 +100,7 @@ $(document).ready(function() {
 			 Visual representation uses x and y axis, rotation is clamped within 30 degrees.`);
 		}
 
-		if (socket.readyState === WebSocket.OPEN) {
+		if (socket.connected) {
 			const data = {
 				absolute,
 				rot_x,
@@ -115,8 +111,7 @@ $(document).ready(function() {
 				acc_z,
 				currentScreenOrientation
 			};
-			console.log("Sending data:", data);
-			socket.send(JSON.stringify(data));
+			socket.emit('gyroData', data);
 		}
 	}, 10);
 
