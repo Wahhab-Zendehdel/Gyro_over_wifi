@@ -34,18 +34,9 @@ async def main():
     print(f"Web server serving at https://localhost:{PORT}")
 
     # Start the WebSocket server
-    try:
-        async with websockets.serve(register, "0.0.0.0", 8081, ssl=ssl_context):
-            print("WebSocket server started at wss://localhost:8081")
-            await httpd_thread
-    except KeyboardInterrupt:
-        print("Shutting down...")
-        httpd.shutdown()
-        httpd.server_close()
-        tasks = [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
+    async with websockets.serve(register, "0.0.0.0", 8081, ssl=ssl_context):
+        print("WebSocket server started at wss://localhost:8081")
+        await httpd_thread
 
 connected = set()
 
@@ -57,4 +48,7 @@ async def register(websocket):
         connected.remove(websocket)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nShutting down...")
