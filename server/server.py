@@ -30,14 +30,21 @@ async def main():
     # Start the web server in a separate thread
     httpd = TCPServer(("", PORT), WebServer)
     httpd.socket = ssl_context.wrap_socket(httpd.socket, server_side=True)
-    httpd_thread = loop.run_in_executor(None, httpd.serve_forever)
+
     print(f"Web server serving at https://localhost:{PORT}")
 
     # Start the WebSocket server
     ws_server = await websockets.serve(register, "0.0.0.0", 8081, ssl=ssl_context)
     print("WebSocket server started at wss://localhost:8081")
 
-    return httpd, ws_server, httpd_thread
+    try:
+        await loop.run_in_executor(None, httpd.serve_forever)
+    finally:
+        print("\nShutting down...")
+        httpd.shutdown()
+        httpd.server_close()
+        ws_server.close()
+        await ws_server.wait_closed()
 
 connected = set()
 
@@ -49,17 +56,7 @@ async def register(websocket):
         connected.remove(websocket)
 
 if __name__ == "__main__":
-    httpd = None
-    ws_server = None
     try:
-        httpd, ws_server, httpd_thread = asyncio.run(main())
-        loop = asyncio.get_running_loop()
-        loop.run_until_complete(httpd_thread)
+        asyncio.run(main())
     except KeyboardInterrupt:
-        print("\nShutting down...")
-        if httpd:
-            httpd.shutdown()
-            httpd.server_close()
-        if ws_server:
-            ws_server.close()
-            asyncio.run(ws_server.wait_closed())
+        pass
